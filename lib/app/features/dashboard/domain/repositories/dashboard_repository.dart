@@ -1,7 +1,7 @@
 import 'package:supabase_crud_app/app/features/dashboard/domain/entities/product_entity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ProductRepository {
+class DashboardRepository {
   final supabase = Supabase.instance.client;
 
   Future<List<ProductEntity>> fetchAllProducts() async {

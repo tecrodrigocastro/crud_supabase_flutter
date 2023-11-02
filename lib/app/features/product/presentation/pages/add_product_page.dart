@@ -1,5 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_crud_app/app/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:supabase_crud_app/app/features/product/domain/usecases/add_product_usecase.dart';
+import 'package:supabase_crud_app/app/features/product/presentation/bloc/product_bloc.dart';
+import 'package:supabase_crud_app/shared/usecases/show_snack_bar.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -17,6 +25,8 @@ class _AddProductPageState extends State<AddProductPage> {
 
   @override
   Widget build(BuildContext context) {
+    final productBloc = context.read<ProductBloc>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.pink.shade100,
@@ -136,22 +146,52 @@ class _AddProductPageState extends State<AddProductPage> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink.shade100,
-                    fixedSize: Size(MediaQuery.of(context).size.width, 50),
-                  ),
-                  icon: const Icon(
-                    Icons.add,
-                    color: Colors.black,
-                  ),
-                  label: Text(
-                    'Adicionar produto',
-                    style: GoogleFonts.nunito(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    final isValid = _formKey.currentState?.validate();
-                    if (isValid != true) return;
+                BlocBuilder<ProductBloc, ProductState>(
+                  builder: (context, state) {
+                    if (state is ProductLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else {
+                      return ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink.shade100,
+                          fixedSize:
+                              Size(MediaQuery.of(context).size.width, 50),
+                        ),
+                        icon: const Icon(
+                          Icons.add,
+                          color: Colors.black,
+                        ),
+                        label: Text(
+                          'Adicionar produto',
+                          style: GoogleFonts.nunito(color: Colors.black),
+                        ),
+                        onPressed: () {
+                          final isValid = _formKey.currentState?.validate();
+                          if (isValid != true) return;
+                          productBloc.add(
+                            AddProductEvent(
+                              addProductUseCase: AddProductUseCase(
+                                name: nameController.text,
+                                image: imagemController.text,
+                                price: toDouble(priceController.text)!,
+                                size: sizeController.text,
+                              ),
+                            ),
+                          );
+
+                          Timer(const Duration(seconds: 3), () {
+                            showMessageSnackBar(
+                                context, 'Produto Adicionado com sucesso!',
+                                color: Colors.green);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const DashboardPage(),
+                              ),
+                            );
+                          });
+                        },
+                      );
+                    }
                   },
                 ),
               ],

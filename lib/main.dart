@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_crud_app/app/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:supabase_crud_app/app/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:supabase_crud_app/app/features/product/presentation/bloc/product_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -19,8 +20,15 @@ class AppWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => DashboardBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => DashboardBloc(),
+        ),
+        BlocProvider(
+          create: (context) => ProductBloc(),
+        )
+      ],
       child: MaterialApp(
         title: 'SupaBase',
         theme: ThemeData(

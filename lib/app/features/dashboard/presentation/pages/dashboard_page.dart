@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_crud_app/app/features/dashboard/domain/repositories/product_repository.dart';
+import 'package:supabase_crud_app/app/features/dashboard/domain/repositories/dashboard_repository.dart';
 import 'package:supabase_crud_app/app/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:supabase_crud_app/app/features/product/presentation/bloc/product_bloc.dart';
 import 'package:supabase_crud_app/app/features/product/presentation/pages/add_product_page.dart';
+import 'package:supabase_crud_app/shared/usecases/show_snack_bar.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -13,15 +15,20 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  ProductRepository repository = ProductRepository();
+  DashboardRepository repository = DashboardRepository();
+  ProductBloc productBloc = ProductBloc();
+  // DashboardBloc dashboardBloc = DashboardBloc();
   @override
   void initState() {
+    productBloc.add(ProductInitialState());
+    //dashboardBloc.add(FetchAllProducts());
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final dashboardBloc = context.read<DashboardBloc>();
+    final productBloc = context.read<ProductBloc>();
     dashboardBloc.add(FetchAllProducts());
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +56,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   style: GoogleFonts.nunito(fontWeight: FontWeight.bold),
                 ),
                 Expanded(
-                  child: BlocBuilder<DashboardBloc, DashboardState>(
+                  child: BlocConsumer<DashboardBloc, DashboardState>(
+                    listener: (context, state) {},
                     builder: (context, state) {
                       if (state is DashboardLoading) {
                         return const Center(child: CircularProgressIndicator());
@@ -105,15 +113,89 @@ class _DashboardPageState extends State<DashboardPage> {
                                         color: Colors.grey.shade800,
                                       ),
                                     ),
-                                    ElevatedButton.icon(
-                                      style: ElevatedButton.styleFrom(
-                                        minimumSize: const Size(150, 35),
-                                      ),
-                                      onPressed: () {
-                                        print(product.id);
-                                      },
-                                      icon: const Icon(Icons.edit_note_sharp),
-                                      label: const Text('Editar'),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            print(product.id);
+                                          },
+                                          icon:
+                                              const Icon(Icons.edit_note_sharp),
+                                        ),
+                                        IconButton(
+                                          onPressed: () => showDialog<String>(
+                                            context: context,
+                                            builder: (BuildContext context) =>
+                                                BlocBuilder<ProductBloc,
+                                                    ProductState>(
+                                              builder: (context, state) {
+                                                if (state is ProductLoading) {
+                                                  return const Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  );
+                                                }
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                      'Deletar produto'),
+                                                  content: Text(
+                                                    '${product.name} vai ser apagado, deseja continuar?',
+                                                    style: GoogleFonts.nunito(),
+                                                  ),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(context,
+                                                              'Cancel'),
+                                                      child: const Text(
+                                                          'Cancelar'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        productBloc.add(
+                                                          DeleteProductEvent(
+                                                              product: product),
+                                                        );
+                                                        dashboardBloc.add(
+                                                          RemoveProduct(
+                                                            product: product,
+                                                          ),
+                                                        );
+                                                        showMessageSnackBar(
+                                                          context,
+                                                          'Produto deletado com sucesso!',
+                                                          color: Colors.red,
+                                                        );
+
+                                                        Navigator.of(context)
+                                                            .pushReplacement(
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                const DashboardPage(),
+                                                          ),
+                                                        );
+                                                        /* Timer(
+                                                                                                                  const Duration(
+                                                                                                                      seconds: 5),
+                                                                                                                  () {},
+                                                                                                                ); */
+                                                      },
+                                                      child:
+                                                          const Text('Deletar'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                      ],
                                     )
                                   ],
                                 ),

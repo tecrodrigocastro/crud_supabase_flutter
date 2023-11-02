@@ -12,7 +12,14 @@ class ProductInitial extends ProductState {}
 
 class ProductLoading extends ProductState {}
 
-class ProductAddSucces extends ProductState {}
+class ProductAddSucces extends ProductState {
+  final String? message;
+  const ProductAddSucces({
+    this.message,
+  });
+}
+
+class ProductDelete extends ProductState {}
 
 class ProductAddError extends ProductState {
   final String? error;
