@@ -5,6 +5,7 @@ import 'package:supabase_crud_app/app/features/dashboard/domain/repositories/das
 import 'package:supabase_crud_app/app/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:supabase_crud_app/app/features/product/presentation/bloc/product_bloc.dart';
 import 'package:supabase_crud_app/app/features/product/presentation/pages/add_product_page.dart';
+import 'package:supabase_crud_app/app/features/product/presentation/pages/edit_product_page.dart';
 import 'package:supabase_crud_app/shared/usecases/show_snack_bar.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -119,7 +120,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                       children: [
                                         IconButton(
                                           onPressed: () {
-                                            print(product.id);
+                                            Navigator.of(context)
+                                                .push(MaterialPageRoute(
+                                              builder: (context) =>
+                                                  EditProductPage(
+                                                product: product,
+                                              ),
+                                            ));
                                           },
                                           icon:
                                               const Icon(Icons.edit_note_sharp),
